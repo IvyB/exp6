@@ -10,7 +10,7 @@ import java.text.*;
  * Gourmet Coffee System.
  *
  * @author iCarnegie
- * @version 1.1.0
+ * @version 1.1.1
  * @see Product
  * @see Coffee
  * @see CoffeeBrewer
@@ -266,9 +266,14 @@ public class GourmetCoffeeGUI extends JPanel {
 	 */
 	private JPanel getDataFieldsPanel(ArrayList<DataField> dataFields) {
 
-		/* COPY YOUR CODE FROM PREVIOUS EXERCISE */
-
-		return new JPanel(); // REMOVE; USED SO THIS FILE COMPILES
+		JPanel tempJPanel=new JPanel(new GridLayout(dataFields.size(),2));
+		for (DataField date : dataFields) {
+			//JLabel tempLabel=new JLabel(date.getName());
+			//JTextField tempTextField=new JTextField(date.getValue());
+			tempJPanel.add(new JLabel(date.getName()));
+			tempJPanel.add(new JTextField(date.getValue()));
+		}
+		return tempJPanel;
 	}
 
 	/**
@@ -311,10 +316,47 @@ public class GourmetCoffeeGUI extends JPanel {
 		 * @param event  the event object.
 		 */
 		public void actionPerformed(ActionEvent event) {
-
-
-			/* PLACE YOUR CODE HERE */
-
+			
+			int quantity=0;
+			if (catalogList.isSelectionEmpty() ) {
+				JOptionPane.showMessageDialog(null, "��ѡ�в�Ʒ���ٵ����ť", "����",  JOptionPane.ERROR_MESSAGE);
+				
+			}else {
+				try {
+					quantity=Integer.parseInt(quantityTextField.getText());
+					if (quantity<=0) {
+						JOptionPane.showMessageDialog(null, "��Ʒ����ӦΪ����", "����",  JOptionPane.ERROR_MESSAGE);
+					}
+					else {
+						String code = (String) catalogList.getSelectedValue();
+						Product product = catalog.getProduct(code);
+						OrderItem tempOrderItem1=new OrderItem(product, quantity);
+						OrderItem tempOrderItem2=currentOrder.getItem(product);
+						Sales tempSales=new Sales();
+						/*for (Product tempProduct : catalog) {
+							if (tempProduct.equals(product)) {
+								
+							}
+						}*/
+						if (tempOrderItem2!=null) {
+							currentOrder.removeItem(tempOrderItem2);
+						}
+							currentOrder.addItem(tempOrderItem1);
+							//orderList.
+							/*OrderItem[] tempOrderItem=currentOrder.getItems();
+							for (int i = 0; i < tempOrderItem.length; i++) {
+								
+							}*/
+							orderList.setListData((currentOrder.getItems()));
+							tempSales.addOrder(currentOrder);
+							statusTextArea.setText(salesFormatter.formatSales(tempSales));
+							totalTextField.setText(dollarFormatter.format(currentOrder.getTotalCost()));
+					}
+				} catch (Exception e) {
+					JOptionPane.showMessageDialog(null, "��Ʒ��������Ϊ����", "����",  JOptionPane.ERROR_MESSAGE);
+				}
+			}
+			
 		}
 	}
 
@@ -329,11 +371,31 @@ public class GourmetCoffeeGUI extends JPanel {
 		 * @param event  the event object.
 		 */
 		public void actionPerformed(ActionEvent event) {
+			//String code = (String) orderList.getSelectedValue();
+			//Product product = catalog.getProduct(code);
+			if (currentOrder.getNumberOfItems()==0) {
+				JOptionPane.showMessageDialog(null, "����δ�����κβ�Ʒ", "����",  JOptionPane.ERROR_MESSAGE);
+			}else if (orderList.isSelectionEmpty()) {
+				JOptionPane.showMessageDialog(null, "����δѡ���κβ�Ʒ", "����",  JOptionPane.ERROR_MESSAGE);
 
-
-			/* PLACE YOUR CODE HERE */
-
-
+			}else {
+				currentOrder.removeItem((OrderItem) orderList.getSelectedValue());
+				Sales tempSales=new Sales();
+				/*
+				DefaultListModel model1 = new DefaultListModel();
+				jList.setModel(model1);
+	            model1.addElement("����");
+	            model1.removeElement("ɾ��");
+	            int n��jList.getSelectedIndex(); 
+	            model1.remove(n);
+				*/
+				orderList.setListData((currentOrder.getItems()));
+				tempSales.addOrder(currentOrder);
+				statusTextArea.setText(salesFormatter.formatSales(tempSales));
+				totalTextField.setText(dollarFormatter.format(currentOrder.getTotalCost()));
+				//orderList.updateUI();
+			}
+			
 		}
 	}
 
@@ -392,12 +454,38 @@ public class GourmetCoffeeGUI extends JPanel {
 		 * @param event  the event object.
 		 */
 		public void actionPerformed(ActionEvent event) {
+			String content=salesFormatter.formatSales(sales);
+			if (sales.getNumberOfOrders()==0) {
+	        	JOptionPane.showMessageDialog(null, "û�й����¼", "����",  JOptionPane.ERROR_MESSAGE);
 
-
-			/* PLACE YOUR CODE HERE */
-
+			}else {
+				fileChooser.showDialog(saveSalesButton, "Save");
+				File file=fileChooser.getSelectedFile();
+				FileWriter fileWriter = null;
+		        try {
+		            //fous = new FileOutputStream(file);//д�뵽���Ŀ¼��
+		            //oous = new ObjectOutputStream(fous);
+		            //oous.writeObject(content);//���ĵ�д���ļ���
+		        	fileWriter = new FileWriter(file);
+		        	fileWriter.write(content);
+		        	
+		        } catch (NullPointerException ex) {
+		        	JOptionPane.showMessageDialog(null, "��ѡ���ļ�", "����",  JOptionPane.ERROR_MESSAGE);
+		        } 
+		        catch (IOException e) {
+		        	JOptionPane.showMessageDialog(null, "�ļ��޷����������ߴ�", "����",  JOptionPane.ERROR_MESSAGE);
+				}finally {
+		            try {
+		                //fous.close();
+		            	fileWriter.close();
+		                //oous.close();
+		            } catch (IOException ex) {
+		            	
+		            }
+			}
 		}
 	}
+}
 
 	/*
 	 * This inner class processes <code>plainRadioButton</code> events.
